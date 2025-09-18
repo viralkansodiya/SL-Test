@@ -1,0 +1,58 @@
+{
+ "add_total_row": 0,
+ "columns": [],
+ "creation": "2022-08-01 22:36:57.015444",
+ "disable_prepared_report": 0,
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "mandatory": 0,
+   "options": "Company",
+   "wildcard_filter": 0
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "Start End",
+   "mandatory": 0,
+   "wildcard_filter": 0
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "End Date",
+   "mandatory": 0,
+   "wildcard_filter": 0
+  }
+ ],
+ "idx": 0,
+ "is_standard": "Yes",
+ "javascript": "",
+ "letter_head": "",
+ "modified": "2022-09-15 18:08:25.686197",
+ "modified_by": "Administrator",
+ "module": "Singapore L10N",
+ "name": "GST F5 Summary Report",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "Sales Invoice",
+ "report_name": "GST F5 Summary Report",
+ "report_script": "out_data = []\nsgst_details = frappe.db.get_all('SGST Detail', {\n\t'parent': 'Singapore GST Settings',\n\t'company':filters.company\n\t},\n\t['box_1', 'box_2', 'box_3'])\nif sgst_details and (sgst_details[0].get('box_1') or sgst_details[0].get('box_2') or sgst_details[0].get('box_3')):\n\tquery = f'''\n\tSELECT\n\t\tst.account_head AS gst_code,\n\t\tst.base_tax_amount as amount,\n\t\tsi.total as taxless_total\n\t\t\n\tFROM\n\t\t`tabSales Invoice` AS si,\n\t\t`tabSales Taxes and Charges` AS st\n\tWHERE\n\t\t  st.parent=si.name\n\t\t'''\n\tif filters.company:\n\t\tquery = f\"{query} AND si.company='{filters.company}'\"\n\tfrom_date = filters.get('from_date')\n\tto_date = filters.get('to_date')\n\tif from_date and to_date:\n\t\tquery = f\"{query} AND si.posting_date BETWEEN '{from_date}' AND '{to_date}'\"\n\tquery = f\"{query} ORDER By si.name\"\n\tsql_data= frappe.db.sql(f\"{query}\", as_dict=True)\n\tout_data = []\n\tsales_invoice_with_tax = []\n\tsales_invoice_with_tax_total = 0\n\tbox_1_total = 0\n\tbox_2_total = 0\n\tbox_3_total = 0\n\ttotal = 0\n\tif sql_data:\n\t\tcp_sqldata = sql_data.copy()\n\t\tfor data in cp_sqldata:\n\t\t\tif data.get('gst_code') in [sgst_details[0].get('box_1'), sgst_details[0].get('box_2'), sgst_details[0].get('box_3')]:\n\t\t\t\tsales_invoice_with_tax_total = sales_invoice_with_tax_total + data['amount']\n\t\t\t\tsales_invoice_with_tax.append(data)\n\t\t\tcp_dict=data.copy()\n\t\t\tcp_dict['amount']=cp_dict['taxless_total']\n\t\t\tif data.get('gst_code') == sgst_details[0].get('box_1'):\n\t\t\t\ttotal = total + cp_dict.get('amount')\n\t\t\t\tbox_1_total = box_1_total + cp_dict.get('amount')\n\t\t\telif data.get('gst_code') == sgst_details[0].get('box_2'):\n\t\t\t\ttotal = total + cp_dict.get('amount')\n\t\t\t\tbox_2_total = box_2_total + cp_dict.get('amount')\n\t\t\telif data.get('gst_code') == sgst_details[0].get('box_3'):\n\t\t\t\ttotal = total + cp_dict.get('amount')\n\t\t\t\tbox_3_total = box_3_total + cp_dict.get('amount')\n\t\tbox_1_total_line = [{\n\t\t\t'transaction_type':'Box 1 Total value of standard-rated supplies (excluding GST)',\n\t\t\t'heading':1, \n\t\t\t'amount': box_1_total\n\t\t\t}]\n\t\tbox_2_total_line = [{\n\t\t\t'transaction_type':'Box 2 Total value of standard-rated supplies (excluding GST)',\n\t\t\t'heading':1,\n\t\t\t'amount': box_2_total\n\t\t\t}]\n\t\tbox_3_total_line = [{\n\t\t\t'transaction_type':'Box 3 Total value of standard-rated supplies (excluding GST)',\n\t\t\t'heading':1,\n\t\t\t'amount': box_3_total\n\t\t\t}]\n\t\tout_data = box_1_total_line + box_2_total_line + box_3_total_line\n\tout_data = out_data + [{'transaction_type':'Box 4 Total (Box 1, Box 2, Box 3)', 'heading':1, 'amount':total}]\n\t\n\t\n\tpi_query = f'''\n\t  SELECT\n\t\tpt.account_head AS gst_code,\n\t\tpt.base_tax_amount as amount,\n\t\tp.total as taxless_total\n\t\t\n\t  FROM\n\t\t`tabPurchase Invoice` AS p,\n\t\t`tabPurchase Taxes and Charges` AS pt\n\t  WHERE\n\t\t  pt.parent=p.name'''\n\tif filters.company:\n\t\tpi_query = f\"{pi_query} AND p.company='{filters.company}'\"\n\tif from_date and to_date:\n\t\tpi_query = f\"{pi_query} AND p.posting_date BETWEEN '{from_date}' AND '{to_date}'\"\n\tquery = f\"{pi_query} ORDER By p.name\"\n\t\n\tp_sql_data= frappe.db.sql(f\"{pi_query}\", as_dict=True)\n\tbox_5_balance_total = 0\n\tbox_7_balance_total = 0\n\tbox_5 = [{'transaction_type':'Total for Box 5 Total value of taxable purchases (excluding GST)', 'heading':1}]\n\tp_total = 0\n\tpurchase_invoice_with_tax = []\n\tpurchase_invoice_with_tax_total = 0\n\tif p_sql_data:\n\t\t# out_data = out_data + [{'transaction_type':'Box 5 Total value of taxable purchases (excluding GST)', 'heading':1}]\n\t\tcp_sqldata = p_sql_data.copy()\n\t\tfor data in cp_sqldata:\n\t\t\t# if data.get('gst_code') in [sgst_details[0].get('box_1'), sgst_details[0].get('box_2'), sgst_details[0].get('box_3')]:\n\t\t\tpurchase_invoice_with_tax_total = purchase_invoice_with_tax_total + data['amount']\n\t\t\tbox_7_balance_total = box_7_balance_total+data.get('amount')\n\t\t\tdata['balance'] = box_7_balance_total\n\t\t\tpurchase_invoice_with_tax.append(data)\n\t\t\tcp_dict=data.copy()\n\t\t\tcp_dict['amount']=cp_dict['taxless_total']\n\t\t\tbox_5_balance_total = box_5_balance_total+cp_dict.get('amount')\n\t\t\tcp_dict['balance'] = box_5_balance_total\n\t\t\tp_total = p_total + cp_dict.get('amount')\n\t\tbox_5[0]['amount'] = p_total\n\t\tout_data = out_data+box_5\n\tif sales_invoice_with_tax:\n\t\tout_data = out_data + [{'transaction_type':'Total for Box 6 Output tax due', 'heading':1, 'amount':sales_invoice_with_tax_total}]\n\tif purchase_invoice_with_tax:\n\t\tout_data = out_data + [{'transaction_type':'Total for Box 7 Input tax and refunds claimed', 'heading':1, 'amount':purchase_invoice_with_tax_total}]\n\tbox_8 = []\n\tif purchase_invoice_with_tax_total and sales_invoice_with_tax_total:\n\t\tif sales_invoice_with_tax_total > purchase_invoice_with_tax_total:\n\t\t\tbox_8 = [{'transaction_type':'Box 8 Tax To Be Paid', 'heading':1, 'amount': sales_invoice_with_tax_total-purchase_invoice_with_tax_total}]\n\t\telif sales_invoice_with_tax_total < purchase_invoice_with_tax_total:\n\t\t\tbox_8 = [{'transaction_type':'Box 8 Tax To Be Claimed', 'heading':1, 'amount': purchase_invoice_with_tax_total-sales_invoice_with_tax_total}]\n\t\telif sales_invoice_with_tax_total == purchase_invoice_with_tax_total:\n\t\t\tbox_8 = [{'transaction_type':'Box 8 Tax', 'heading':1, 'amount': purchase_invoice_with_tax_total}]\n\t\tout_data = out_data + box_8\ncolumn = [\n  {\n\t'fieldname': 'transaction_type',\n\t'label': _(''),\n\t'fieldtype': 'Data',\n\t'width': 1000\n  },\n  {\n\t'fieldname': 'amount',\n\t'label': _('AMOUNT'),\n\t'fieldtype': 'Currency',\n\t  'width': 200\n  }\n]\n\ndata = column, out_data",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "Accounts User"
+  },
+  {
+   "role": "Accounts Manager"
+  },
+  {
+   "role": "Employee Self Service"
+  }
+ ]
+}

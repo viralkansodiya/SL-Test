@@ -1,0 +1,18 @@
+include MANIFEST.in
+include requirements.txt
+include *.json
+include *.md
+include *.py
+include *.txt
+recursive-include singapore_l10n *.css
+recursive-include singapore_l10n *.csv
+recursive-include singapore_l10n *.html
+recursive-include singapore_l10n *.ico
+recursive-include singapore_l10n *.js
+recursive-include singapore_l10n *.json
+recursive-include singapore_l10n *.md
+recursive-include singapore_l10n *.png
+recursive-include singapore_l10n *.py
+recursive-include singapore_l10n *.svg
+recursive-include singapore_l10n *.txt
+recursive-exclude singapore_l10n *.pyc

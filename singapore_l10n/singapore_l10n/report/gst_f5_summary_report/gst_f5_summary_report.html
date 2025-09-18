@@ -1,0 +1,159 @@
+<div><h1 class="text-center">{%= __("GST F5") %}</h1>
+<h1 class="text-center">{%= __("GOODS AND SERVICES TAX RETURN") %}</h2>
+	<table class="table table-bordered">
+		<tr>
+			<td>{%= __("Name : ") %}{%=filters.company %}</td>
+		</tr>
+		<tr>
+			<td>{%= __("GST Refrence No :") %}</td>
+		</tr>
+		<tr>
+			<td>{%= __("Period covered by this return : ") %}{%= frappe.datetime.str_to_user(filters.from_date) %}{%= __("  To ") %}{%= frappe.datetime.str_to_user(filters.to_date) %}</td>
+		</tr>
+	</table>
+		<table class="table table-bordered">
+			<thead>
+				<tr>
+					<th style="background-color: rgb(157, 156, 156);color: white;">{%= __("Supplies") %}</th>
+					<th style="background-color: rgb(157, 156, 156);color: white;"></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>{%= __("(1) ") %}{%= data[0].transaction_type %}</td>
+					<td>
+						<p style="padding: 1px; border: 1px solid rgb(0, 0, 0);text-align:right;">{%= (data[0].amount).toFixed(2) %}</p>
+					</td>
+				</tr>
+				<td>{%= __("(2) ") %}{%= data[1].transaction_type %}</td>
+				<td >
+					<p style="padding: 1px; border: 1px solid rgb(0, 0, 0);text-align:right;">{%= (data[1].amount).toFixed(2) %}</p>
+				</td>
+				</tr>
+				<td>{%= __("(3) ") %}{%= data[2].transaction_type %}</td>
+				<td>
+					<p style="padding: 1px; border: 1px solid rgb(0, 0, 0);text-align:right;">{%= (data[2].amount).toFixed(2) %}</p>
+				</td>
+				</tr>
+				<td>{%= __("(4) ") %}{%= data[3].transaction_type %}</td>
+				<td>
+					<p style="padding: 1px; border: 1px solid rgb(0, 0, 0);text-align:right;">{%= (data[3].amount).toFixed(2) %}</p>
+				</td>
+				</tr>
+			</tbody>
+			<thead>
+				<tr>
+					<th style="background-color: rgb(157, 156, 156);color: white;">{%= __("Purchases") %}</th>
+					<th style="background-color: rgb(157, 156, 156);color: white;"></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>{%= __("(5) ") %}{%= data[4].transaction_type %}</td>
+					<td>
+						<p style="padding: 1px; border: 1px solid rgb(0, 0, 0);text-align:right;">{%= (data[4].amount).toFixed(2) %}</p>
+					</td>
+				</tr>
+			</tbody>
+			<thead>
+				<tr>
+					<th style="background-color: rgb(157, 156, 156);color: white;">{%= __("Taxes") %}</th>
+					<th style="background-color: rgb(157, 156, 156);color: white;"></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>{%= __("(6) ") %}{%= data[5].transaction_type %}</td>
+					<td>
+						<p style="padding: 1px; border: 1px solid rgb(0, 0, 0);text-align:right;">{%= (data[5].amount).toFixed(2) %}</p>
+					</td>
+				</tr>
+				<td>{%= __("(7) ") %}{%= data[6].transaction_type %}</td>
+				<td>
+					<p style="padding: 1px; border: 1px solid rgb(0, 0, 0);text-align:right;">{%= (data[6].amount).toFixed(2) %}</p>
+				</td>
+				</tr>
+				<td>{%= __("(8) ") %}{%= data[7].transaction_type %}</td>
+				<td>
+					<p style="padding: 1px; border: 1px solid rgb(0, 0, 0);text-align:right;">{%= (data[7].amount).toFixed(2) %}</p>
+				</td>
+				</tr>
+			</tbody>
+			<thead>
+				<tr>
+					<th style="background-color: rgb(157, 156, 156);color: white;">{%= __("Applicable to Taxable Persons under Major Exporter Scheme") %}</th>
+					<th style="background-color: rgb(157, 156, 156);color: white;"></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>{%= __("(9) ") %}{%= data[8].transaction_type %}</td>
+					<td>
+						<p style="padding: 1px; border: 1px solid rgb(0, 0, 0);text-align:right;">{%= (data[8].amount).toFixed(2) %}</p>
+					</td>
+				</tr>
+			</tbody>
+			<thead>
+				<tr>
+					<th style="background-color: rgb(157, 156, 156);color: white;">{%= __("Tourist Refund Claimed/Bad Debts Relief/Pre-Registartion Claims") %} </th></th>
+					<th style="background-color: rgb(157, 156, 156);color: white;"></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>{%= __("(10) ") %}{%= data[9].transaction_type %}</td>
+					<td>
+						<p style="padding: 1px; border: 1px solid rgb(0, 0, 0);text-align:right;">{%= (data[9].amount).toFixed(2) %}</p>
+					</td>
+				</tr>
+				<td>{%= __("(11) ") %}{%= data[10].transaction_type %}</td>
+				<td>
+					<p style="padding: 1px; border: 1px solid rgb(0, 0, 0);text-align:right;">{%= (data[10].amount).toFixed(2) %}</p>
+				</td>
+				</tr>
+				<td>{%= __("(12) ") %}{%= data[11].transaction_type %}</td>
+				<td>
+					<p style="padding: 1px; border: 1px solid rgb(0, 0, 0);text-align:right;">{%= (data[11].amount).toFixed(2) %}</p>
+				</td>
+				</tr>
+			</tbody>
+			<thead>
+				<tr>
+					<th style="background-color: rgb(157, 156, 156);color: white;">{%= __("Revenue") %}</th>
+					<th style="background-color: rgb(157, 156, 156);color: white;"></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>{%= __("(13) ") %}{%= data[12].transaction_type %}</td>
+					<td>
+						<p style="padding: 1px; border: 1px solid rgb(0, 0, 0);text-align:right;">{%= (data[12].amount).toFixed(2) %}</p>
+					</td>
+				</tr>
+			</tbody>
+			<thead>
+				<tr>
+					<th style="background-color: rgb(157, 156, 156);color: white;">{%= __("Declaration") %}</th>
+					<th style="background-color: rgb(157, 156, 156);color: white;"></th>
+				</tr>
+			</thead>
+
+			<tbody>
+				<tr>
+					<td>{%= __("Name of Declarant :") %} </td>
+				</tr>
+				<tr>
+					<td>{%= __("Declarant ID :") %} </td>
+				</tr>
+				<tr>
+					<td>{%= __("Designation :") %} </td>
+				</tr>
+				<tr>
+					<td>{%= __("Contact Person :") %} </td>
+				</tr>
+				<tr>
+					<td>{%= __("Contact Telephone Number :") %} </td>
+				</tr>
+			</tbody>
+	</table>
+</div>

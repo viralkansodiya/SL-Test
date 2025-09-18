@@ -1,0 +1,9 @@
+Metadata-Version: 2.4
+Name: singapore_l10n
+Version: 0.0.2
+Summary: Singapore Localization
+Author: earthians
+Author-email: earhians@info
+Dynamic: author
+Dynamic: author-email
+Dynamic: summary

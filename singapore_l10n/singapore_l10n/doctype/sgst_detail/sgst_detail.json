@@ -1,0 +1,135 @@
+{
+ "actions": [],
+ "autoname": "autoincrement",
+ "creation": "2022-08-18 17:42:19.215639",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "column_break_2",
+  "box_1",
+  "box_2",
+  "section_break_7",
+  "box_3_section_break",
+  "box_3",
+  "bank_interest_income",
+  "column_break_9",
+  "realised_exchange_gainloss",
+  "section_break_11",
+  "box_5",
+  "box_5_1",
+  "box_5_2",
+  "box_5_3",
+  "section_break_5",
+  "other_income"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "box_1",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Box 1",
+   "options": "Account"
+  },
+  {
+   "fieldname": "box_2",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Box 2",
+   "options": "Account"
+  },
+  {
+   "fieldname": "box_3_section_break",
+   "fieldtype": "Section Break",
+   "label": "Box 3"
+  },
+  {
+   "fieldname": "box_3",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Box 3",
+   "options": "Account"
+  },
+  {
+   "fieldname": "bank_interest_income",
+   "fieldtype": "Link",
+   "label": "Bank Interest Income",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "realised_exchange_gainloss",
+   "fieldtype": "Link",
+   "label": "Realised Exchange Gain/Loss",
+   "options": "Account"
+  },
+  {
+   "fieldname": "other_income",
+   "fieldtype": "Link",
+   "label": "Other Income",
+   "options": "Account"
+  },
+  {
+   "fieldname": "section_break_5",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "section_break_7",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "section_break_11",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "box_5",
+   "fieldtype": "Link",
+   "label": "Box 5",
+   "options": "Account"
+  },
+  {
+   "fieldname": "box_5_1",
+   "fieldtype": "Link",
+   "label": "Box 5",
+   "options": "Account"
+  },
+  {
+   "fieldname": "box_5_2",
+   "fieldtype": "Link",
+   "label": "Box 5",
+   "options": "Account"
+  },
+  {
+   "fieldname": "box_5_3",
+   "fieldtype": "Link",
+   "label": "Box 5",
+   "options": "Account"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2023-09-28 14:26:24.854306",
+ "modified_by": "Administrator",
+ "module": "Singapore L10N",
+ "name": "SGST Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}
