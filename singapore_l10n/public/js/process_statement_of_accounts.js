@@ -1,249 +1,301 @@
 frappe.ui.form.on('Process Statement Of Accounts', {
-	refresh(frm) {
-		frm.add_custom_button(__('Download SOA'), function(){
-			frappe.call({
-				"method": "singapore_l10n.events.process_statement_of_accounts.get_statements_of_account_from_gl",
-				"args": {
-					'name': frm.doc.name
-				},
-				callback: function (r) {
-					let p_html = set_html(frm, r.message)
-					frappe.render_pdf(p_html, {orientation:"Portrait"});
-				}
-			});
-		});
-		frm.remove_custom_button(__("Download"))
-		}
-})
-
-
-var set_html = function(frm, r) {
-	let style = `
-	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
-	<style>
-.page-break    { display: block; page-break-before: always; }
-
-.lhead{
-	font-size:9px;
-	margin-top:0px;
-	margin-bottom:0px !important;
-	vertical-align: top !important;
-	}
-	*{
-		font-family: 'IBM Plex Sans', sans-serif !important;
-	}
-	.print-format {
-		margin-left: 4mm;
-		margin-right: 4mm;	  
-	}
-	.new1{
-		border-top: 1px dotted !important;
-		}
-	.blhead{
-	font-weight:600 !important;
-	font-size:9px !important;
-	}
-	.print-format .letter-head {
-		margin-bottom: 0px;
-		}
-	.print-format .letterhead td, .print-format th {
-	padding: 1 1px 1 1px !important;
-	vertical-align: top !important;
-	margin:0px !important;
-	}
-	.print-format p{
-	margin:0px 0px 2px;
-	}
-	.print-format .letter-head {
-	margin-bottom: 0px;
-	}
-	
-	p{
-        font-size: 13px;
+    refresh(frm) {
+        // Add custom button to download SOA
+        frm.add_custom_button(__('Download SOA'), () => {
+            frappe.call({
+                method: "singapore_l10n.events.process_statement_of_accounts.get_statements_of_account_from_gl",
+                args: { name: frm.doc.name },
+                callback: function(r) {
+					const data = r.message[0]
+					const header = r.message[1]
+                    const report = r.message[2]
+                    const p_html = generateStatementHTML(frm, data, header, report);
+                    frappe.render_pdf(p_html, { orientation: "Portrait" });
+                }
+            });
+        });
+        
     }
-	.address-sec{
-		margin-top:0px;
-		margin-bottom:0px !important;
-		vertical-align: text-top;
-	}
-	.left_dotted {
-		border-left: 2px dotted !important;
-	  }
-	.ontop{
-		border-top: 1px;
-	}
-	.onbottom{
-		border-bottom: 1px;;
-	}
-	
-	 
-</style>`
-let header = `
-<div class="letter-head"  style="padding-top:10px;">
-	<div class="letter-head">
-	<table  width="100%" "class="letter-head">
-	<tbody>
-	   <tr>
-		  <td width="10%">
-			<img height="60" src="/files/KGS-Logo.png" width="60">
-		  </td>
-		  <td width="21%">
-			 <p style="margin-bottom:0px !important; margin-top:0px;">
-			 	<b style="font-size:11px; margin-bottom:0px !important; margin-top:0px;">KGS Pte Ltd</b>
-			 </p>
-			 <p class="lhead">8 Tuas South Lane,</p>
-			 <p class="lhead">#01-71, Factory 4,</p>
-			 <p class="lhead">Singapore 637302</p>
-		  </td>
-		  <td width="32%">
-			 <br>
-			 <p class="lhead"><b class="blhead">Web:</b>kgs.com.sg</p>
-			 <p class="lhead"><b class="blhead">UEN/GST No:</b> 201607799N</p>
-		  </td>
-		  <td align="centre">
-			 <b style="font-size: 20px; text-transform: uppercase;">
-			 Statement of Account 
-			  </b>
-		 </td>
-	</tr></tbody>
- </table>	
- <div/>
-	<div/>
-	<hr>
-	<div>
-		`
+});
 
-	let html = style + header
-	if (r.cust) {
-		$.each(r.cust, function(j, cu) {
-			html +=`
-	
-		<table width="100%" class="cust_head">
-	<tbody>
-		<tr>
-			<td>
-			<p class="address-sec">${(cu.cad_data && cu.cad_data.customer_name)?cu.cad_data.customer_name:''}</p>
-			<p class="address-sec">${(cu.cad_data && cu.cad_data.address_line1)?cu.cad_data.address_line1:''}</p>
-			<p class="address-sec">${(cu.cad_data && cu.cad_data.address_line2)?cu.cad_data.address_line2:''}</p>
-			<p class="address-sec">${(cu.cad_data && cu.cad_data.city)?cu.cad_data.city:''} ${(cu.cad_data && cu.cad_data.pincode)?cu.cad_data.pincode:''}</p>
-			<p class="address-sec">${(cu.cad_data && cu.cad_data.country)?cu.cad_data.country:''}</p>
-			</td>
-			<td>
-				<p class="address-sec">Currency : ${r.currency ? r.currency : ''}</p>
-				<p class="address-sec">Payment Terms : C.O.D</p>
-				<p class="address-sec">Total Due : ${(cu.ageing && cu.ageing.outstanding)?format_currency(cu.ageing.outstanding):''}</p>
-			</td>
-			<td class="left_dotted">
-				<p class="address-sec" style="padding-left:10px;">Statement No.: ${frm.doc.name}</p>
-				<p class="address-sec" style="padding-left:10px;">Date.: ${r.posting_date} </p>
-			</td>
-		</tr>
-	</tbody>
-</table>
-<hr class="new1">
-		<table class="table table-bordered"  style="font-size: 13px; border-spacing: 1px;">
-		<thead>
-			<tr>
-				<td style="width: 5%"><b>No.</b></td>
-				<td style="width: 20%"><b>Doc NO</b></td>
-				<td style="width: 12%"><b>DOCDATE</b></td>
-				<td style="width: 10%"><b>DUE DATE</b></td>
-				<td style="width: 10%" align="right"><b>DEBIT</b></td>
-				<td style="width: 10%" align="right"><b>CREDIT</b></td>
-				<td style="width: 14%" align="right"><b>ACCUM. BALANCE</b></td>
-			</tr>
-		</thead>
-		<tbody>
-		`
-		if (cu.data) {
-			var idx = 1;
-			$.each(cu.data, function(i, val) {
-				if (val.voucher_no) {
-					html += `<tr>
-						<td style="width: 5%">${idx}</td>
-						<td style="width: 20%">${val.voucher_no?val.voucher_no:''}</td>
-						<td style="width: 12%">${val.posting_date?val.posting_date:''}</td>
-						<td style="width: 12%">${val.due_date?val.due_date:''}</td>
-						<td style="width: 10%" align="right">${val.invoiced?format_currency(val.invoiced.toFixed(2)).replace('$',''):'-'}</td>
-						<td style="width: 10%" align="right">${val.credit_note?(format_currency((Number(Math.round((val.credit_note)+Number.EPSILON)*100)/100).toFixed(2)).replace('$','')):'-'}</td>
-						<td style="width: 14%" align="right">${val.outstanding?format_currency(val.outstanding):'-'}</td>
-					</tr>`
-				if (idx % 27 == 0){
-					html += `
-						</tbody>
-						</table>
-						<div class="page-break"></div>
-						`
-					html = html + header
-					html += `
-							<table class="table table-bordered"  style="font-size: 13px; border-spacing: 1px;">
-							<thead>
-								<tr>
-									<td style="width: 5%"><b>No.</b></td>
-									<td style="width: 20%"><b>Doc NO</b></td>
-									<td style="width: 12%"><b>DOCDATE</b></td>
-									<td style="width: 10%"><b>DUE DATE</b></td>
-									<td style="width: 10%" align="right"><b>DEBIT</b></td>
-									<td style="width: 10%" align="right"><b>CREDIT</b></td>
-									<td style="width: 14%" align="right"><b>ACCUM. BALANCE</b></td>
-								</tr>
-							</thead>
-							<tbody>
-							`
-					
-				}
-				idx += 1
-				
-				}
-			})
-			
-		}
-		html += `</tbody>
-		</table>
-		
-		<div id="footer-html" class="visible-pdf letter-head-footer">
-		<table width="100%" class="table" >
-			<tbody>
-				<tr>
-					<td width="14%" class="ontop onbottom"><p><b>In Words:</b></p></td>
-					<td width="58%" class="ontop onbottom"><p>${cu.ageing.outstanding_in_words}</p></td>
-					<td width="12%" class="ontop onbottom"><p><b>Total Due</b>:</p></td>
-					<td width="16%" class="ontop onbottom"><p>${(cu.ageing && cu.ageing.outstanding)?format_currency(cu.ageing.outstanding):'-'}</p></td>
-				</tr>
-			</tbody>
-		</table>
-		<table class="table table-bordered" style="font-size: 13px; border-spacing: 0px;">
-		<thead>
-			<tr>
-				<td style="width: 16%" align="center"><b>Current Due</b></td>
-				<td style="width: 16%" align="center"><b>1-30 Days</b></td>
-				<td style="width: 16%" align="center"><b>31-60 Days</b></td>
-				<td style="width: 16%" align="center"><b>61-90 Days</b></td>
-				<td style="width: 16%" align="center"><b>120+ Days</b></td>
-				<td style="width: 16%" align="center"><b>Amount Due</b></td>
-			</tr>
-		</thead>
-		<tbody>
-			<tr>
-				<td align="center">${(cu.ageing && cu.ageing.current_due)?format_currency(cu.ageing.current_due):'-'}</td>
-				<td align="center">${(cu.ageing && cu.ageing.range1)?format_currency(cu.ageing.range1):'-'}</td>
-				<td align="center">${(cu.ageing && cu.ageing.range2)?format_currency(cu.ageing.range2):'-'}</td>
-				<td align="center">${(cu.ageing && cu.ageing.range3)?format_currency(cu.ageing.range3):'-'}</td>
-				<td align="center">${(cu.ageing && cu.ageing.range4)?format_currency(cu.ageing.range4):'-'}</td>
-				<td align="center">${(cu.ageing && cu.ageing.outstanding)?format_currency(cu.ageing.outstanding):'-'}</td>
-			</tr>
-		</tbody>
-	</table>
-	<center style="font-size: 8px;">THIS IS A COMPUTER GENERATED DOCUMENT. NO SIGNATURE IS REQUIRED. </center>
-	</div>`
-	if ((j+1)< r.cust.length) {
-		html += `
-			<div style="page-break-before: always;" class="pagebreak"></div>`
-		html += header
-	}
-	})
-	}
-	
-	html += '</div>'
-	return html
-}
+// Generate the complete statement HTML
+const generateStatementHTML = function(frm, data, header, report) {
+    return `
+        ${getStyles()}
+        ${getHeader(header)}
+        ${getCustomerSections(frm, data, report)}
+    `;
+};
+
+// Get CSS styles for the document
+const getStyles = function() {
+    return `
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;700&display=swap">
+    <style>
+        .page-break { display: block; page-break-before: always; }
+        
+        .lhead {
+            font-size: 9px;
+            margin-top: 0px;
+            margin-bottom: 0px !important;
+            vertical-align: top !important;
+        }
+        
+        * {
+            font-family: 'IBM Plex Sans', sans-serif !important;
+        }
+        
+        .print-format {
+            margin-left: 4mm;
+            margin-right: 4mm;
+        }
+        
+        .new1 {
+            border-top: 1px dotted !important;
+        }
+        
+        .blhead {
+            font-weight: 600 !important;
+            font-size: 9px !important;
+        }
+        
+        .print-format .letter-head {
+            margin-bottom: 0px;
+        }
+        
+        .print-format .letterhead td, 
+        .print-format th {
+            padding: 1px !important;
+            vertical-align: top !important;
+            margin: 0px !important;
+        }
+        
+        .print-format p {
+            margin: 0px 0px 2px;
+        }
+        
+        p {
+            font-size: 13px;
+        }
+        
+        .address-sec {
+            margin-top: 0px;
+            margin-bottom: 0px !important;
+            vertical-align: text-top;
+        }
+        
+        .left_dotted {
+            border-left: 2px dotted !important;
+        }
+        
+        .ontop {
+            border-top: 1px solid;
+        }
+        
+        .onbottom {
+            border-bottom: 1px solid;
+        }
+        
+        .table-bordered {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        
+        .table-bordered td, 
+        .table-bordered th {
+            border: 1px solid #ddd;
+            padding: 4px;
+        }
+        
+        .text-right {
+            text-align: right;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+    </style>`;
+};
+
+// Get document header
+const getHeader = function(header) {
+    return `${header}`;
+};
+
+// Generate customer sections
+const getCustomerSections = function(frm, data, report) {
+    let html = '';
+    
+    if (data.cust && data.cust.length) {
+        data.cust.forEach((customer, index) => {
+            html += getCustomerSection(frm, customer, data, index, report);
+            
+            // Add page break if not the last customer
+            if (index < data.cust.length - 1) {
+                html += `<div class="page-break"></div>${getHeader()}`;
+            }
+        });
+    }
+    
+    return html;
+};
+
+// Generate a single customer section
+const getCustomerSection = function(frm, customer, data, index, report) {
+    const cad = customer.cad_data || {};
+    const ageing = customer.ageing || {};
+    
+    return `
+        ${getCustomerHeader(cad, data.currency, ageing, frm)}
+        ${getTransactionsTable(customer.data || [], report)}
+        ${getCustomerFooter(ageing, frm.doc.name, data.posting_date)}
+    `;
+};
+
+// Get customer header information
+const getCustomerHeader = function(cad, currency, ageing, frm) {
+    return `
+    <table width="100%" class="cust_head">
+        <tbody>
+            <tr>
+                <td>
+                    <p class="address-sec">${cad.customer_name || ''}</p>
+                    <p class="address-sec">${cad.address_line1 || ''}</p>
+                    <p class="address-sec">${cad.address_line2 || ''}</p>
+                    <p class="address-sec">${cad.city || ''} ${cad.pincode || ''}</p>
+                    <p class="address-sec">${cad.country || ''}</p>
+                </td>
+                <td>
+                    <p class="address-sec">Currency : ${currency || ''}</p>
+                    <p class="address-sec">Payment Terms : C.O.D</p>
+                    <p class="address-sec">Total Due : ${format_currency(ageing.outstanding) || ''}</p>
+                </td>
+                <td class="left_dotted">
+                    <p class="address-sec" style="padding-left: 10px;">Statement No.: ${frm.doc.name}</p>
+                    <p class="address-sec" style="padding-left: 10px;">Date: ${frm.doc.posting_date} </p>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <hr class="new1">
+    `;
+};
+
+// Get transactions table
+const getTransactionsTable = function(transactions, report) {
+    let html = `
+            <table class="table-bordered" style="font-size: 13px;">
+                <thead>
+                    <tr>
+                        <th style="width: 5%">No.</th>
+                        <th style="width: 20%">Doc NO</th>
+                        <th style="width: 12%">DOCDATE</th>
+                        <th style="width: 10%">DUE DATE</th>
+                        <th style="width: 10%" class="text-right">DEBIT</th>
+                        <th style="width: 10%" class="text-right">CREDIT</th>`
+        if(report == "General Ledger"){
+            html += `<th style="width: 14%" class="text-right">ACCUM. BALANCE</th>`
+        }else{
+            console.log("Report ARAR")
+            html += `<th style="width: 14%" class="text-right">Outstading Amount</th>`
+        }
+        html += `
+                    </tr>
+                </thead>
+                <tbody>`;
+    
+    if (transactions && transactions.length) {
+        transactions.forEach((transaction, idx) => {
+            if (transaction.voucher_no) {
+                html += getTransactionRow(transaction, idx + 1);
+                
+                // Add page break every 27 rows
+                if ((idx + 1) % 27 === 0) {
+                    html += `
+                        </tbody>
+                        </table>
+                        <div class="page-break"></div>
+                        ${getHeader()}
+                        <table class="table-bordered" style="font-size: 13px;">
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%">No.</th>
+                                    <th style="width: 20%">Doc NO</th>
+                                    <th style="width: 12%">Document DATE</th>
+                                    <th style="width: 10%">DUE DATE</th>
+                                    <th style="width: 10%" class="text-right">DEBIT</th>
+                                    <th style="width: 10%" class="text-right">CREDIT</th>
+                        `
+                    if(report == "General Ledger"){
+                        html += `<th style="width: 14%" class="text-right">ACCUM. BALANCE</th>`
+                    }else{
+                        console.log("Report ARAR")
+                        html += `<th style="width: 14%" class="text-right">Outstading Amount</th>`
+                    }
+                    html += `
+                                </tr>
+                            </thead>
+                            <tbody>`;
+                }
+            }
+        });
+    }
+    
+    html += `</tbody></table>`;
+    return html;
+};
+
+// Get a single transaction row
+const getTransactionRow = function(transaction, index) {
+    return `
+    <tr>
+        <td align="center">${index}</td>
+        <td align="center">${transaction.voucher_no || ''}</td>
+        <td align="center">${transaction.posting_date || ''}</td>
+        <td align="center">${transaction.due_date || ''}</td>
+        <td class="text-right">${transaction.invoiced ? format_currency(transaction.invoiced.toFixed(2)).replace('$', '') : '-'}</td>
+        <td class="text-right">${transaction.credit_note ? format_currency((Number(Math.round((transaction.credit_note) + Number.EPSILON) * 100) / 100).toFixed(2)).replace('$', '') : '-'}</td>
+        <td class="text-right">${transaction.outstanding ? format_currency(transaction.outstanding) : '-'}</td>
+    </tr>`;
+};
+
+// Get customer footer with summary
+const getCustomerFooter = function(ageing, statementNo, postingDate) {
+    return `
+    <div id="footer-html" class="visible-pdf letter-head-footer">
+        <table width="100%" class="table">
+            <tbody>
+                <tr>
+                    <td width="14%" class="ontop onbottom"><p><b>In Words:</b></p></td>
+                    <td width="58%" class="ontop onbottom"><p>${ageing.outstanding_in_words || ''}</p></td>
+                    <td width="12%" class="ontop onbottom"><p><b>Total Due:</b></p></td>
+                    <td width="16%" class="ontop onbottom"><p>${format_currency(ageing.outstanding) || '-'}</p></td>
+                </tr>
+            </tbody>
+        </table>
+        <table class="table-bordered" style="font-size: 13px;">
+            <thead>
+                <tr>
+                    <th style="width: 16%" class="text-center">Current Due</th>
+                    <th style="width: 16%" class="text-center">1-30 Days</th>
+                    <th style="width: 16%" class="text-center">31-60 Days</th>
+                    <th style="width: 16%" class="text-center">61-90 Days</th>
+                    <th style="width: 16%" class="text-center">120+ Days</th>
+                    <th style="width: 16%" class="text-center">Amount Due</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="text-center">${format_currency(ageing.current_due) || '-'}</td>
+                    <td class="text-center">${format_currency(ageing.range1) || '-'}</td>
+                    <td class="text-center">${format_currency(ageing.range2) || '-'}</td>
+                    <td class="text-center">${format_currency(ageing.range3) || '-'}</td>
+                    <td class="text-center">${format_currency(ageing.range4) || '-'}</td>
+                    <td class="text-center">${format_currency(ageing.outstanding) || '-'}</td>
+                </tr>
+            </tbody>
+        </table>
+		<br>
+        <center style="font-size: 8px;">THIS IS A COMPUTER GENERATED DOCUMENT. NO SIGNATURE IS REQUIRED.</center>
+    </div>`;
+};
