@@ -9,6 +9,7 @@ frappe.ui.form.on('Process Statement Of Accounts', {
 					const data = r.message[0]
 					const header = r.message[1]
                     const report = r.message[2]
+                    console.log(data)
                     const p_html = generateStatementHTML(frm, data, header, report);
                     frappe.render_pdf(p_html, { orientation: "Portrait" });
                 }
@@ -207,7 +208,7 @@ const getTransactionsTable = function(transactions, report) {
     if (transactions && transactions.length) {
         transactions.forEach((transaction, idx) => {
             if (transaction.voucher_no) {
-                html += getTransactionRow(transaction, idx + 1);
+                html += getTransactionRow(transaction, idx + 1, report);
                 
                 // Add page break every 27 rows
                 if ((idx + 1) % 27 === 0) {
@@ -246,17 +247,30 @@ const getTransactionsTable = function(transactions, report) {
 };
 
 // Get a single transaction row
-const getTransactionRow = function(transaction, index) {
-    return `
-    <tr>
-        <td align="center">${index}</td>
-        <td align="center">${transaction.voucher_no || ''}</td>
-        <td align="center">${transaction.posting_date || ''}</td>
-        <td align="center">${transaction.due_date || ''}</td>
-        <td class="text-right">${transaction.invoiced ? format_currency(transaction.invoiced.toFixed(2)).replace('$', '') : '-'}</td>
-        <td class="text-right">${transaction.credit_note ? format_currency((Number(Math.round((transaction.credit_note) + Number.EPSILON) * 100) / 100).toFixed(2)).replace('$', '') : '-'}</td>
-        <td class="text-right">${transaction.outstanding ? format_currency(transaction.outstanding) : '-'}</td>
-    </tr>`;
+const getTransactionRow = function(transaction, index, report) {
+    if(report == "General Ledger"){
+        return `
+        <tr>
+            <td align="center">${index}</td>
+            <td align="center">${transaction.voucher_no || ''}</td>
+            <td align="center">${transaction.posting_date || ''}</td>
+            <td align="center">${transaction.due_date || ''}</td>
+            <td class="text-right">${transaction.debit ? format_currency(transaction.debit.toFixed(2)).replace('$', '') : '-'}</td>
+            <td class="text-right">${transaction.credit ? format_currency((Number(Math.round((transaction.credit) + Number.EPSILON) * 100) / 100).toFixed(2)).replace('$', '') : '-'}</td>
+            <td class="text-right">${transaction.balance ? format_currency(transaction.balance) : '-'}</td>
+        </tr>`;
+    }else{
+        return `
+        <tr>
+            <td align="center">${index}</td>
+            <td align="center">${transaction.voucher_no || ''}</td>
+            <td align="center">${transaction.posting_date || ''}</td>
+            <td align="center">${transaction.due_date || ''}</td>
+            <td class="text-right">${transaction.invoiced ? format_currency(transaction.invoiced.toFixed(2)).replace('$', '') : '-'}</td>
+            <td class="text-right">${transaction.credit_note ? format_currency((Number(Math.round((transaction.credit_note) + Number.EPSILON) * 100) / 100).toFixed(2)).replace('$', '') : '-'}</td>
+            <td class="text-right">${transaction.outstanding ? format_currency(transaction.outstanding) : '-'}</td>
+        </tr>`;
+    }
 };
 
 // Get customer footer with summary
@@ -276,7 +290,6 @@ const getCustomerFooter = function(ageing, statementNo, postingDate) {
         <table class="table-bordered" style="font-size: 13px;">
             <thead>
                 <tr>
-                    <th style="width: 16%" class="text-center">Current Due</th>
                     <th style="width: 16%" class="text-center">1-30 Days</th>
                     <th style="width: 16%" class="text-center">31-60 Days</th>
                     <th style="width: 16%" class="text-center">61-90 Days</th>
@@ -286,7 +299,6 @@ const getCustomerFooter = function(ageing, statementNo, postingDate) {
             </thead>
             <tbody>
                 <tr>
-                    <td class="text-center">${format_currency(ageing.current_due) || '-'}</td>
                     <td class="text-center">${format_currency(ageing.range1) || '-'}</td>
                     <td class="text-center">${format_currency(ageing.range2) || '-'}</td>
                     <td class="text-center">${format_currency(ageing.range3) || '-'}</td>

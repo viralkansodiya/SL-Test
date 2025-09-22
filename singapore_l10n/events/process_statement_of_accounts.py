@@ -9,10 +9,9 @@ from frappe.www.printview import get_print_style
 from frappe.utils import getdate, money_in_words, today
 from erpnext.accounts.party import get_party_account_currency
 from erpnext.accounts.report.general_ledger.general_ledger import execute as get_soa
-from erpnext.accounts.doctype.process_statement_of_accounts.process_statement_of_accounts import set_ageing, get_common_filters, get_ar_filters
+from erpnext.accounts.doctype.process_statement_of_accounts.process_statement_of_accounts import set_ageing, get_common_filters, get_ar_filters, get_gl_filters
 from erpnext.accounts.report.accounts_receivable.accounts_receivable import execute as get_ar_soa
 from frappe.utils.pdf import get_pdf
-
 
 @frappe.whitelist()
 def get_statements_of_account(document_name):
@@ -130,12 +129,6 @@ def get_statements_of_account_from_gl(name, is_from_customer = False):
 			res = data.get(cust.customer)[0]
 		else:
 			frappe.throw("Data not found for this customer.")
-
-		if psoa_doc.report ==  "Accounts Receivable":
-			ar_res = get_ar_soa(filters)
-			col, res = ar_res[0], ar_res[1]
-			if not res:
-				continue
 
 		if len(res) == 3:
 			continue
