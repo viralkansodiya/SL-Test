@@ -67,7 +67,7 @@ doctype_js = {
 # ------------
 
 # before_install = "singapore_l10n.install.before_install"
-# after_install = "singapore_l10n.install.after_install"
+after_install = "singapore_l10n.patches.create_letter_head_psoa.execute"
 
 # Uninstallation
 # ------------
